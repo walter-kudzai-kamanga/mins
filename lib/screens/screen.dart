@@ -9,7 +9,7 @@ class FilePickerScreen extends StatefulWidget {
 
 class _FilePickerScreenState extends State<FilePickerScreen> {
   String? _fileName;
-  Uint8List? _fileBytes; // Stores file content for web
+  Uint8List? _fileBytes; 
 
   Future<void> pickFile() async {
     FilePickerResult? result = await FilePicker.platform.pickFiles(
@@ -54,8 +54,3 @@ class _FilePickerScreenState extends State<FilePickerScreen> {
   }
 }
 
-void main() {
-  runApp(MaterialApp(
-    home: FilePickerScreen(),
-  ));
-}

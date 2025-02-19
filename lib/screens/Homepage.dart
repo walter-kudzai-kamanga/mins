@@ -1,3 +1,7 @@
+import 'dart:typed_data';
+
+import 'package:cool_alert/cool_alert.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:mins/screens/login.dart';
 
@@ -10,7 +14,26 @@ class DashboardScreen extends StatefulWidget {
 
 class _DashboardScreenState extends State<DashboardScreen> {
   int _selectedIndex = 0;
+ String? _fileName;
+  Uint8List? _fileBytes; 
+   Future<void> pickFile() async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.any,
+      allowMultiple: false,
+    );
 
+    if (result != null) {
+      setState(() {
+        _fileName = result.files.single.name;
+        _fileBytes = result.files.single.bytes; // Web returns file as bytes
+      });
+
+      // Example: Convert bytes to a file (for uploads)
+      if (_fileBytes != null) {
+        print("File size: ${_fileBytes!.length} bytes");
+      }
+    }
+  }
   // Function to get the selected page content
   Widget getSelectedScreen() {
     switch (_selectedIndex) {
@@ -56,6 +79,177 @@ class _DashboardScreenState extends State<DashboardScreen> {
       ),
     );
   }
+  
+Widget buildUploadReport() {
+  
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Row(
+        children: [
+          Row(children: [
+             DashboardCard(title: '16', subtitle: 'Reports', icon: Icons.show_chart, color: Colors.green ),
+             const SizedBox(width: 20,),
+ //DashboardCard(title: '0', subtitle: 'Pending Issues', icon: Icons.error, color: Colors.red),
+
+          ],),
+          Expanded(
+            flex: 3,
+            child: SingleChildScrollView(
+              scrollDirection: Axis.vertical,
+              child: DataTable(
+                headingRowColor: WidgetStateProperty.all(Colors.blue),
+                headingRowHeight: 30,
+                columns: const [
+                  DataColumn(label: Text('No.', style: TextStyle(color: Colors.white))),
+                  DataColumn(label: Text('Date', style: TextStyle(color: Colors.white))),
+                  DataColumn(label: Text('Report Name', style: TextStyle(color: Colors.white))),
+                   DataColumn(label: Text('Actions', style: TextStyle(color: Colors.white))),
+                ],
+                rows: List.generate(5, (index) {
+                  return DataRow(cells: [
+                    DataCell(Text('#${index + 1}')),
+                    DataCell(Text('2022-06-30')),
+                    DataCell(Text('Item ${index + 1}')),
+                      DataCell(
+              Row(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.remove_red_eye_outlined, color: Colors.black, size: 15),
+                    onPressed: () {
+                      // Edit action
+                    },
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.download_outlined, color: Colors.black, size: 15),
+                    onPressed: () {
+                      // Delete action
+                    },
+                  ),
+                ],
+              ),
+            ),
+                  ]);
+                }),
+              ),
+            ),
+          ),
+          const SizedBox(width: 16), // Spacing between the Table and Card
+
+          // Card Section
+         Expanded(
+  flex: 1,
+  child: Card(
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+    elevation: 5,
+    child: Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        children: [
+          // Top Bar (Header)
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.blue, // Background color for the top bar
+              borderRadius: BorderRadius.circular(10),
+            ),
+            padding: const EdgeInsets.all(8),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'Upload Report', // Title in the top bar
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.info_outline, color: Colors.white), // Optional icon
+                  onPressed: () {
+                    // Action for the icon button
+                  },
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 20), // Space between top bar and content
+          
+        Container(
+          width: double.infinity,
+  padding: const EdgeInsets.all(16),  // Padding inside the container
+  decoration: BoxDecoration(
+    color:  const Color.fromARGB(255, 184, 184, 184),
+    borderRadius: BorderRadius.circular(8),  // Rounded corners (optional)
+  ),
+  child:  _fileName != null
+                ? Text(" $_fileName", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold))
+                : 
+  
+  
+  Column(
+    children: [
+      Icon(
+        Icons.upload,
+        size: 50,
+        color: Colors.blue,
+      ),
+      const SizedBox(height: 16),
+      const Text(
+        'Upload Report',
+        style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+      ),
+    ],
+  ),
+),
+const SizedBox(height: 20,),
+Visibility(
+  visible: _fileName != null,
+  child: ElevatedButton(
+    style: ElevatedButton.styleFrom(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(4),
+      ),
+      backgroundColor: const Color.fromARGB(255, 2, 19, 33),
+    ),
+    onPressed: (){
+      CoolAlert.show(
+   context: context,
+   type: CoolAlertType.success,
+   text: "Publication successful!",
+);
+    },
+    child: const Text(
+      "Save",
+      style: TextStyle(color: Colors.white),
+    ),
+  ),
+),
+
+          const SizedBox(height: 20),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              
+              style: ElevatedButton.styleFrom(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(4),
+                  
+                ),backgroundColor: const Color.fromARGB(255, 2, 19, 33)
+              ),
+              onPressed: pickFile,
+              child: const Text("Select Report",style: TextStyle(color: Colors.white),),
+            ),
+          ),
+        ],
+      ),
+    ),
+  ),
+)
+
+        ],
+      ),
+    );
+  }
 }
 
 
@@ -86,12 +280,6 @@ Widget buildTopBar() {
       ],
     ),
   );
-}
-Widget buildUploadReport(){
-  return Padding(
-    padding: EdgeInsets.all(8)
-    
-    );
 }
 Widget buildDashboard() {
   return Padding(
