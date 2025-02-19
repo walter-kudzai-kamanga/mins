@@ -107,7 +107,7 @@ class _LoginFormState extends State<LoginForm> {
                       ),backgroundColor: const Color.fromARGB(255, 5, 38, 95)
                     ),
                     onPressed: () {
-                     Navigator.push(context,MaterialPageRoute(builder: (context)=>AdminDashboardApp()));
+                     Navigator.push(context,MaterialPageRoute(builder: (context)=>DashboardScreen ()));
                     },
                     child: const Text('Login',style: TextStyle(color: Colors.white),),
                   ),

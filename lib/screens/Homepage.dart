@@ -1,62 +1,63 @@
 import 'package:flutter/material.dart';
+import 'package:mins/screens/login.dart';
 
-
-class AdminDashboardApp extends StatefulWidget {
-  const AdminDashboardApp({super.key});
-
-  @override
-  State<AdminDashboardApp> createState() => _AdminDashboardAppState();
-}
-
-class _AdminDashboardAppState extends State<AdminDashboardApp> {
-  int _selectedIndex=0;
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Admin Dashboard',
-      theme: ThemeData(primarySwatch: Colors.blue),
-      home: const DashboardScreen(),
-    );
-  }
-}
-
-class DashboardScreen extends StatelessWidget {
+class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
+
+  @override
+  _DashboardScreenState createState() => _DashboardScreenState();
+}
+
+class _DashboardScreenState extends State<DashboardScreen> {
+  int _selectedIndex = 0;
+
+  // Function to get the selected page content
+  Widget getSelectedScreen() {
+    switch (_selectedIndex) {
+      case 0:
+        return buildDashboard(); // Dashboard screen
+      case 1:
+        return buildUploadReport();
+      case 2:
+        return const Center(child: Text("Add User", style: TextStyle(fontSize: 22)));
+      default:
+        return buildDashboard();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         backgroundColor: Colors.blue,
         actions: [
           buildTopBar(),
         ],
       ),
-      
-    //  drawer: const DashboardDrawer(),
       body: Row(
         children: [
           Expanded(
-            
-            flex: 2, 
-            child: Container(
-              color: Colors.blue,
-              child: const DashboardDrawer())),
+            flex: 2,
+            child: DashboardDrawer(
+              selectedIndex: _selectedIndex,
+              onItemSelected: (index) {
+                setState(() {
+                  _selectedIndex = index;
+                });
+              },
+            ),
+          ),
           Expanded(
             flex: 8,
-            child: Column(
-              children: [
-              //  buildTopBar(),
-                buildDashboard(),
-              ],
-            ),
+            child: getSelectedScreen(),
           ),
         ],
       ),
     );
   }
 }
+
 
 Widget buildTopBar() {
   return Container(
@@ -86,7 +87,12 @@ Widget buildTopBar() {
     ),
   );
 }
-
+Widget buildUploadReport(){
+  return Padding(
+    padding: EdgeInsets.all(8)
+    
+    );
+}
 Widget buildDashboard() {
   return Padding(
     padding: const EdgeInsets.all(2),
@@ -105,7 +111,7 @@ Widget buildDashboard() {
           runSpacing: 16, // Vertical spacing
           children: const [
             DashboardCard(title: 'Wednesday', subtitle: 'Recently Added', icon: Icons.book, color: Colors.teal),
-            DashboardCard(title: '16', subtitle: 'Reports', icon: Icons.show_chart, color: Colors.green),
+            DashboardCard(title: '16', subtitle: 'Reports', icon: Icons.show_chart, color: Colors.green ),
             DashboardCard(title: '44', subtitle: 'Total Users', icon: Icons.person_add, color: Colors.amber),
             DashboardCard(title: '0', subtitle: 'Pending Issues', icon: Icons.error, color: Colors.red),
           ],
@@ -137,27 +143,49 @@ class _DashboardCardState extends State<DashboardCard> {
   int _selectedIndex=0;
   @override
   Widget build(BuildContext context) {
+    return TweenAnimationBuilder<double>(
+  tween: Tween(begin: 5, end: 20), // Glow range
+  duration: Duration(seconds: 1),
+  curve: Curves.easeInOut,
+  builder: (context, glow, child) {
     return SizedBox(
-      width: 285,
-      height: 170,
-      child: Card(
-        color: widget.color,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(widget.icon, size: 40, color: Colors.white),
-              const SizedBox(height: 10),
-              Text(widget.title, style: const TextStyle(fontSize: 24, color: Colors.white, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 8),
-              Text(widget.subtitle, style: const TextStyle(fontSize: 16, color: Colors.white)),
-            ],
-          ),
+      width: 280,
+      height: 160,
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(10),
+          boxShadow: [
+            BoxShadow(
+              color: widget.color.withOpacity(0.6),
+              blurRadius: glow,
+              spreadRadius: glow / 4,
+            ),
+          ],
         ),
+        child: child,
       ),
     );
+  },
+  child: Card(
+    
+    color: widget.color,
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+    child: Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(widget.icon, size: 40, color: Colors.white),
+          const SizedBox(height: 10),
+          Text(widget.title, style: const TextStyle(fontSize: 24, color: Colors.white, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 8),
+          Text(widget.subtitle, style: const TextStyle(fontSize: 16, color: Colors.white)),
+        ],
+      ),
+    ),
+  ),
+);
+
   }
 }
 Widget buildRecentOrdersTable() {
@@ -206,29 +234,25 @@ Widget buildRecentOrdersTable() {
   );
 }
 
+class DashboardDrawer extends StatelessWidget {
+  final int selectedIndex;
+  final Function(int) onItemSelected;
 
-class DashboardDrawer extends StatefulWidget {
-  const DashboardDrawer({super.key});
+  const DashboardDrawer({
+    super.key,
+    required this.selectedIndex,
+    required this.onItemSelected,
+  });
 
-  @override
-  State<DashboardDrawer> createState() => _DashboardDrawerState();
-}
-
-class _DashboardDrawerState extends State<DashboardDrawer> {
-  int _selectedIndex=0;
   Widget buildListTile(int index, IconData icon, String title) {
-    bool isSelected = _selectedIndex == index;
-    
+    bool isSelected = selectedIndex == index;
+
     return GestureDetector(
-      onTap: () {
-        setState(() {
-          _selectedIndex = index;
-        });
-      },
+      onTap: () => onItemSelected(index), // Call parent function
       child: Container(
-        margin: const EdgeInsets.symmetric(vertical: 5, horizontal: 10), // Add spacing
+        margin: const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
         decoration: BoxDecoration(
-          color: isSelected ? Colors.white.withOpacity(0.2) : Colors.transparent, // Highlight when selected
+          color: isSelected ? Colors.white.withOpacity(0.2) : Colors.transparent,
           borderRadius: BorderRadius.circular(10),
           border: isSelected ? Border.all(color: Colors.white, width: 1.5) : null,
         ),
@@ -239,87 +263,92 @@ class _DashboardDrawerState extends State<DashboardDrawer> {
       ),
     );
   }
+
   @override
   Widget build(BuildContext context) {
     return Container(
       color: const Color.fromARGB(255, 67, 67, 67),
       child: Column(
-        
         children: [
-       DrawerHeader(
-  decoration: const BoxDecoration(color: Color.fromARGB(255, 67, 67, 67)),
-  child: Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      // Row for Picture, Name & Email
-      Row(
-        children: [
-          const CircleAvatar(
-            radius: 30,
-            backgroundImage: AssetImage('assets/images/user.jpg'),
-          ),
-          const SizedBox(width: 10), // Space between picture and text
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: const [
-              Text(
-                'Admin Deuce',
-                style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              Text(
-                'admin@deuces.com',
-                style: TextStyle(color: Colors.white70, fontSize: 14),
-                overflow: TextOverflow.ellipsis,
-              ),
-            ],
-          ),
-        ],
-      ),
-      const SizedBox(height: 20), // Space below picture
+          DrawerHeader(
+            decoration: const BoxDecoration(color: Color.fromARGB(255, 67, 67, 67)),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Profile Info
+                Row(
+                  children: [
+                    const CircleAvatar(
+                      radius: 30,
+                      backgroundImage: AssetImage('assets/images/user.jpg'),
+                    ),
+                    const SizedBox(width: 10),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: const [
+                        Text(
+                          'Admin Deuce',
+                          style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                        ),
+                        Text(
+                          'admin@deuces.com',
+                          style: TextStyle(color: Colors.white70, fontSize: 14),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
 
-      // Additional Text Below Picture
-     Row(
-  mainAxisAlignment: MainAxisAlignment.end, // Align items side by side
-  children: [
-    Row(
-      children: const [
-        Icon(Icons.person, color: Colors.white, size: 20), // Icon for "Account"
-        SizedBox(width: 5), // Space between icon and text
-        Text(
-          'Account',
-          style: TextStyle(color: Colors.white, fontSize: 14),
-        ),
-      ],
-    ),
-   const SizedBox(width: 20,),
-    Row(
-      children: const [
-        Icon(Icons.logout, color: Colors.white70, size: 20), // Icon for "Log Out"
-        SizedBox(width: 5), // Space between icon and text
-        Text(
-          'Log Out',
-          style: TextStyle(color: Colors.white70, fontSize: 12),
-        ),
-      ],
-    ),
-  ],
-)
-
+                // Account & Logout Buttons
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    InkWell(
+                       onTap: () {
+    // Handle logout action
+    print("Logout clicked");
+  },
+                      child: Row(
+                        children: const [
+                          Icon(Icons.person, color: Colors.white, size: 20),
+                          SizedBox(width: 5),
+                          Text('Account', style: TextStyle(color: Colors.white, fontSize: 14)),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 20),
+                  InkWell(
+  onTap: () {
+   Navigator.push(context,MaterialPageRoute(builder: (context)=>loginScreen ()));
+  },
+  child: Row(
+    children: const [
+      Icon(Icons.logout, color: Colors.white70, size: 20),
+      SizedBox(width: 5),
+      Text('Log Out', style: TextStyle(color: Colors.white70, fontSize: 12)),
     ],
   ),
-),
+)
 
+                  ],
+                ),
+              ],
+            ),
+          ),
 
-     Expanded(
-      child: ListView(
-        padding: EdgeInsets.zero,
-        children: [
-          buildListTile(0, Icons.dashboard, 'Dashboard'),
-          buildListTile(1, Icons.list, 'Upload Report'),
-          buildListTile(2, Icons.widgets, 'Add User'),
-        ],
-      ),
-    )
+          // Navigation List
+          Expanded(
+            child: ListView(
+              padding: EdgeInsets.zero,
+              children: [
+                buildListTile(0, Icons.dashboard, 'Dashboard'),
+                buildListTile(1, Icons.list, 'Upload Report'),
+                buildListTile(2, Icons.widgets, 'Add User'),
+              ],
+            ),
+          ),
         ],
       ),
     );
