@@ -86,12 +86,7 @@ Widget buildUploadReport() {
       padding: const EdgeInsets.all(8.0),
       child: Row(
         children: [
-          Row(children: [
-             DashboardCard(title: '16', subtitle: 'Reports', icon: Icons.show_chart, color: Colors.green ),
-             const SizedBox(width: 20,),
- DashboardCard(title: '0', subtitle: 'Pending Issues', icon: Icons.error, color: Colors.red),
-
-          ],),
+         
           const SizedBox(height:20),
           Expanded(
             flex: 3,
